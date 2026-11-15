@@ -1,5 +1,5 @@
 {
-  "version": "1.28",
+  "version": "1.29",
   "apk": "dist/Inicio.apk",
-  "notas": "- Configuración compartida: los Fire Stick pueden leer el mismo config.json desde la Raspberry (config_remota).\n- Personalizar sigue funcionando en cada Fire Stick; sus cambios solo afectan a ese Fire Stick."
+  "notas": "- Se retira la configuración compartida de la 1.28: vuelve a ser como la 1.27."
 }

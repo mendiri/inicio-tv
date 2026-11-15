@@ -106,8 +106,6 @@ public class MainActivity extends Activity {
     private View haPage;
     private FrameLayout cardFrame;
     private long updateCheckedAt;
-    private long remoteCheckedAt;
-    private String shownRemoteError;
     /** Páginas de fútbol: las de hoy y las de ayer, de FOOT_ROWS partidos cada una. */
     private final List<View> footPages = new ArrayList<>();
     private final java.util.Map<View, String> pageTitles = new java.util.HashMap<>();
@@ -272,7 +270,6 @@ public class MainActivity extends Activity {
             if (cfg.haShow) refreshHa();
             refreshFootball();
             checkForUpdate();
-            refreshSharedConfig();
             refreshHoroscopes();
             ui.postDelayed(this, HA_EVERY);
         }
@@ -454,7 +451,6 @@ public class MainActivity extends Activity {
                 loadConfig();
                 rebuildRows();
                 weatherAt = 0;
-                remoteCheckedAt = 0;   // y vuelve a mirar la configuración compartida
                 ui.removeCallbacks(refresher);
                 ui.post(refresher);
                 Toast.makeText(MainActivity.this, "Configuración recargada", Toast.LENGTH_SHORT).show();
@@ -896,35 +892,6 @@ public class MainActivity extends Activity {
             ui.postDelayed(this, cfg.cardCycleSeconds * 1000L);
         }
     };
-
-    /** Cada 5 min descarga la configuración compartida (config_remota); si ha cambiado, recarga. */
-    private void refreshSharedConfig() {
-        if (System.currentTimeMillis() - remoteCheckedAt < 5 * 60_000L) return;
-        remoteCheckedAt = System.currentTimeMillis();
-        io.execute(new Runnable() {
-            @Override
-            public void run() {
-                final boolean changed = Config.refreshRemote(MainActivity.this);
-                final String problem = Config.remoteError;
-                ui.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (changed) {
-                            loadConfig();
-                            rebuildRows();
-                            weatherAt = 0;
-                        }
-                        // Un aviso por problema, no uno cada 5 minutos.
-                        if (problem != null && !problem.equals(shownRemoteError)) {
-                            Toast.makeText(MainActivity.this, "Configuración compartida: " + problem
-                                    + ". Se usa la última copia.", Toast.LENGTH_LONG).show();
-                        }
-                        shownRemoteError = problem;
-                    }
-                });
-            }
-        });
-    }
 
     /** Cada 12 h mira si hay versión nueva en GitHub; si la hay, un punto coral en "Personalizar". */
     private void checkForUpdate() {
