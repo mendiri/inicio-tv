@@ -100,9 +100,10 @@ public class EditorActivity extends Activity {
     // ------------------------------------------------------------------ datos
 
     private void load() {
-        raw = Config.loadRaw(this);
-        othersName = raw.optString("nombre_otras", othersName);
-        JSONArray cs = raw.optJSONArray("categorias");
+        raw = Config.loadRaw(this);   // lo que se guarda: el config.json de este Fire Stick
+        JSONObject view = Config.withRemote(this, raw);   // lo que se ve: con la configuración compartida
+        othersName = view.optString("nombre_otras", othersName);
+        JSONArray cs = view.optJSONArray("categorias");
         if (cs != null) {
             for (int i = 0; i < cs.length(); i++) {
                 JSONObject o = cs.optJSONObject(i);
@@ -113,7 +114,7 @@ public class EditorActivity extends Activity {
                 cats.add(c);
             }
         }
-        JSONArray h = raw.optJSONArray("ocultar");
+        JSONArray h = view.optJSONArray("ocultar");
         if (h != null) for (int i = 0; i < h.length(); i++) if (!hidden.contains(h.optString(i))) hidden.add(h.optString(i));
 
         PackageManager pm = getPackageManager();

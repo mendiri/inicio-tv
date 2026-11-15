@@ -86,17 +86,104 @@ final class Config {
             String text = null;
             try (InputStream in = new FileInputStream(f)) {
                 text = read(in);
-                return parse(text);
+                return parse(withRemote(ctx, new JSONObject(text)));
             } catch (Exception e) {
                 Log.w("Inicio", "config.json del usuario no válido; uso el del APK", e);
                 lastError = describe(e, text);
             }
         }
         try (InputStream in = ctx.getAssets().open("config.json")) {
-            return parse(read(in));
+            return parse(new JSONObject(read(in)));
         } catch (Exception e) {
             Log.w("Inicio", "config.json del APK no válido", e);
             return new Config();
+        }
+    }
+
+    // ---------------------------------------------------------------- configuración compartida
+
+    /*
+     * Con "config_remota": "http://192.168.0.12:8123/local/inicio/config.json" en el config.json del Fire Stick, la
+     * configuración sale de ese archivo (el mismo para todos los Fire Stick) y lo que tenga el config.json local
+     * (el token de Home Assistant, o algo propio de ese Fire Stick) se pone encima. Se guarda una copia, así que sin
+     * conexión se usa la última descargada.
+     */
+
+    static File remoteCache(Context ctx) {
+        return new File(ctx.getFilesDir(), "config_remota.json");
+    }
+
+    /** La dirección de la configuración compartida, o "" si no hay. */
+    static String remoteUrl(Context ctx) {
+        return loadRaw(ctx).optString("config_remota", "").trim();
+    }
+
+    /** La configuración local con la compartida debajo (si la hay y ya se descargó). */
+    static JSONObject withRemote(Context ctx, JSONObject local) {
+        if (local.optString("config_remota", "").trim().isEmpty()) return local;
+        File cache = remoteCache(ctx);
+        if (!cache.isFile()) return local;
+        try (InputStream in = new FileInputStream(cache)) {
+            return merge(new JSONObject(read(in)), local);
+        } catch (Exception e) {
+            Log.w("Inicio", "copia de la configuración compartida no válida", e);
+            return local;
+        }
+    }
+
+    /** La configuración tal como la usa Inicio: la local con la compartida debajo. */
+    static JSONObject loadMerged(Context ctx) {
+        return withRemote(ctx, loadRaw(ctx));
+    }
+
+    /** base con over encima: los bloques se mezclan clave a clave; el resto lo pone over. */
+    static JSONObject merge(JSONObject base, JSONObject over) throws org.json.JSONException {
+        JSONObject out = new JSONObject(base.toString());
+        java.util.Iterator<String> keys = over.keys();
+        while (keys.hasNext()) {
+            String k = keys.next();
+            Object v = over.get(k);
+            JSONObject b = out.optJSONObject(k);
+            if (v instanceof JSONObject && b != null) out.put(k, merge(b, (JSONObject) v));
+            else out.put(k, v);
+        }
+        return out;
+    }
+
+    /** Por qué falló la última descarga de la configuración compartida, o null. */
+    static String remoteError;
+
+    /**
+     * Descarga la configuración compartida. true si ha cambiado (hay que recargar). Un archivo con errores no
+     * sustituye a la copia buena: se queda la anterior y remoteError dice por qué.
+     */
+    static boolean refreshRemote(Context ctx) {
+        String url = remoteUrl(ctx);
+        if (url.isEmpty()) return false;
+        try {
+            String text = Net.get(url, null);
+            if (text.startsWith("\uFEFF")) text = text.substring(1);
+            try {
+                new JSONObject(text);
+            } catch (org.json.JSONException e) {
+                remoteError = "el config.json compartido tiene un error (" + describe(e, text) + ")";
+                return false;
+            }
+            remoteError = null;
+            File cache = remoteCache(ctx);
+            if (cache.isFile()) {
+                try (InputStream in = new FileInputStream(cache)) {
+                    if (read(in).equals(text)) return false;
+                }
+            }
+            File tmp = new File(cache.getPath() + ".tmp");
+            try (java.io.OutputStream out = new java.io.FileOutputStream(tmp)) {
+                out.write(text.getBytes("UTF-8"));
+            }
+            return tmp.renameTo(cache);
+        } catch (Exception e) {
+            remoteError = "no se pudo descargar la configuración compartida (" + e.getMessage() + ")";
+            return false;
         }
     }
 
@@ -157,8 +244,7 @@ final class Config {
         return s.startsWith("﻿") ? s.substring(1) : s;
     }
 
-    private static Config parse(String json) throws org.json.JSONException {
-        JSONObject o = new JSONObject(json);
+    private static Config parse(JSONObject o) {
         Config c = new Config();
         c.greeting = o.optString("saludo", c.greeting);
         JSONObject h = o.optJSONObject("horoscopo");
