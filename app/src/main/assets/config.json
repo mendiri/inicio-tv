@@ -1,0 +1,79 @@
+{
+  "titulo": "INICIO",
+  "saludo": "¡Hola!",
+
+  "horoscopo": {
+    "mostrar": true,
+    "signos": ["aries", "tauro"],
+    "fuente": "lavanguardia",
+    "segundos": 12,
+    "pausa_inicial": 3,
+    "segundos_por_linea": 3,
+    "pausa_final": 1.5
+  },
+
+  "tiempo": {
+    "mostrar": true,
+    "ciudad": "Zaragoza",
+    "alternar_segundos": 8
+  },
+
+  "futbol": {
+    "mostrar": true,
+    "ligas": ["esp.1", "uefa.champions", "esp.copa_del_rey", "esp.2:Zaragoza"],
+    "favoritos": ["Zaragoza"],
+    "alternar_segundos": 10
+  },
+
+  "home_assistant": {
+    "mostrar": true,
+    "url": "http://192.168.0.100:8123",
+    "token": "PEGA_AQUI_TU_TOKEN",
+    "titulo": "Mi Casa",
+    "contar_luces": true,
+    "grafica": "",
+    "entidades": [
+      { "nombre": "Temperatura", "entidad": "sensor.temperatura_salon" },
+      { "nombre": "Consumo", "entidad": "sensor.consumo" },
+      { "nombre": "Seguridad", "entidad": "alarm_control_panel.casa" }
+    ]
+  },
+
+  "categorias": [
+    { "nombre": "Streaming", "apps": [
+      "org.smarttube.stable", "com.stremio.one", "com.plexapp.android", "org.jellyfin.androidtv",
+      "com.hbo.hbonow", "com.amazon.firebat", "com.rtve.androidtv", "com.antena3.atresplayer.tv"
+    ] },
+    { "nombre": "TV y Canales", "apps": [
+      "com.tdtchannels.player", "ar.tvplayer.tv"
+    ] },
+    { "nombre": "Música", "apps": [
+      "com.spotify.tv.android", "com.google.android.youtube.tvmusic", "com.amazon.bueller.music"
+    ] },
+    { "nombre": "Juegos", "apps": [
+      "com.valvesoftware.steamlink", "com.retroarch", "com.retroarch.ra32"
+    ] },
+    { "nombre": "Utilidades", "apps": [
+      "org.videolan.vlc", "com.esaba.downloader", "com.aurora.store", "com.amaze.filemanager",
+      "com.yablio.sendfilestotv", "ch.protonvpn.android", "com.amazon.venezia"
+    ] }
+  ],
+
+  "actualizaciones": {
+    "repo": "mendiri/inicio-tv"
+  },
+
+  "mostrar_otras": true,
+  "nombre_otras": "Otras apps",
+
+  "ocultar": [
+    "com.amazon.tv.launcher",
+    "com.amazon.tv.settings.v2",
+    "com.gathin.tvhome",
+    "com.spocky.projengmenu",
+    "com.wolf.minilm",
+    "com.amazon.ftv.screensaver",
+    "com.amazon.tv.oobe",
+    "com.android.settings"
+  ]
+}

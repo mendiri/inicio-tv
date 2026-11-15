@@ -1,0 +1,6 @@
+build/
+entrega/
+*.keystore
+*.zip
+local.properties
+.gradle/

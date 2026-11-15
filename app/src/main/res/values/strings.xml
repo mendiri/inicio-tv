@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Inicio</string>
+    <string name="home_key_name">Inicio: botón Home</string>
+    <string name="home_key_desc">Abre Inicio al pulsar Home. Mantener Home abre los ajustes del Fire TV.</string>
+</resources>
