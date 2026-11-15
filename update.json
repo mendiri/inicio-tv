@@ -1,0 +1,5 @@
+{
+  "version": "1.27",
+  "apk": "dist/Inicio.apk",
+  "notas": "- El fútbol se reparte en varias páginas en vez de mostrar «+N más».\n- Actualizaciones desde la app: Personalizar → Buscar actualizaciones, y un punto en el botón cuando hay versión nueva.\n- Horóscopo: La Vanguardia como fuente principal y ¡HOLA! si repite texto o falla."
+}

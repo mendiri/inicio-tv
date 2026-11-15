@@ -11,9 +11,11 @@ import org.json.JSONObject;
 import java.io.File;
 
 /**
- * Actualizaciones desde las Releases de un repositorio público de GitHub ("repo" en config.json, p. ej.
- * "usuario/inicio-tv"). La última release lleva una etiqueta "v1.26" y un APK adjunto; si su versión es mayor que
- * la instalada, se descarga y se abre el instalador del sistema. El APK tiene que estar firmado con la misma clave.
+ * Actualizaciones desde un repositorio público de GitHub ("repo" en config.json, por defecto "mendiri/inicio-tv").
+ * Primero mira update.json en la rama main:
+ *   {"version": "1.27", "apk": "dist/Inicio.apk", "notas": "..."}
+ * y, si no está, la última Release (etiqueta "v1.27" con un APK adjunto). Si la versión es mayor que la instalada,
+ * se descarga el APK y se abre el instalador del sistema. Tiene que estar firmado con la misma clave.
  */
 final class Updater {
 
@@ -34,6 +36,21 @@ final class Updater {
     }
 
     static Release latest(String repo) throws Exception {
+        try {
+            String raw = "https://raw.githubusercontent.com/" + repo + "/main/";
+            JSONObject u = new JSONObject(Net.get(raw + "update.json", null));
+            Release r = new Release();
+            r.version = u.getString("version").replaceFirst("^[vV]", "");
+            String apk = u.optString("apk", "dist/Inicio.apk");
+            r.apkUrl = apk.startsWith("http") ? apk : raw + apk;
+            r.notes = u.optString("notas", "").trim();
+            return r;
+        } catch (Exception noUpdateJson) {
+            return fromReleases(repo);
+        }
+    }
+
+    private static Release fromReleases(String repo) throws Exception {
         JSONObject o = new JSONObject(Net.get("https://api.github.com/repos/" + repo + "/releases/latest", null));
         Release r = new Release();
         r.version = o.optString("tag_name", "").replaceFirst("^[vV]", "");
