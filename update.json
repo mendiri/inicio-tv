@@ -1,5 +1,5 @@
 {
-  "version": "1.29",
+  "version": "1.30",
   "apk": "dist/Inicio.apk",
-  "notas": "- Se retira la configuración compartida de la 1.28: vuelve a ser como la 1.27."
+  "notas": "- Sin la línea «INICIO»: el horóscopo muestra tres líneas.\n- Botón de opciones del mando (☰) sobre una app: abre su información en los ajustes del Fire TV."
 }

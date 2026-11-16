@@ -42,7 +42,6 @@ final class Config {
     boolean horoscopeHola;
     /** Lectura del horóscopo, en milisegundos reales. */
     long readStartMs = 3000, readLineMs = 3000, readEndMs = 1500;
-    String title = "INICIO";
     boolean weatherShow = true;
     int weatherCycleSeconds = 8;
     String city = "Zaragoza";
@@ -176,7 +175,6 @@ final class Config {
             c.readLineMs = Math.max(500, Math.round(1000 * h.optDouble("segundos_por_linea", c.readLineMs / 1000.0)));
             c.readEndMs = Math.round(1000 * h.optDouble("pausa_final", c.readEndMs / 1000.0));
         }
-        c.title = o.optString("titulo", c.title);
 
         JSONObject w = o.optJSONObject("tiempo");
         if (w != null) {

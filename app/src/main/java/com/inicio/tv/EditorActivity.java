@@ -205,16 +205,10 @@ public class EditorActivity extends Activity {
         page.setPadding(dp(48), dp(26), dp(48), dp(24));
         root.addView(page, new FrameLayout.LayoutParams(-1, -1));
 
-        TextView kicker = Look.text(this, 13, medium, Look.TEXT);
-        kicker.setLetterSpacing(0.08f);
-        kicker.setText("PERSONALIZAR");
-        page.addView(kicker);
         LinearLayout titleRow = new LinearLayout(this);
         titleRow.setOrientation(LinearLayout.HORIZONTAL);
         titleRow.setGravity(Gravity.BOTTOM);
-        LinearLayout.LayoutParams trl = new LinearLayout.LayoutParams(-1, -2);
-        trl.topMargin = dp(14);
-        page.addView(titleRow, trl);
+        page.addView(titleRow, new LinearLayout.LayoutParams(-1, -2));
         TextView title = Look.text(this, 32, regular, Look.TEXT);
         title.setText("Apps y categorías");
         titleRow.addView(title, new LinearLayout.LayoutParams(0, -2, 1));

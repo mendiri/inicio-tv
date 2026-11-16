@@ -73,7 +73,7 @@ public class MainActivity extends Activity {
     private Typeface light, regular, medium;
 
     // Cabecera
-    private TextView titleView, greetingView, settingsButton, customizeButton;
+    private TextView greetingView, settingsButton, customizeButton;
     // Horóscopo: se alterna con el saludo
     private View horoView;
     private TextView horoLabel, horoText;
@@ -139,6 +139,7 @@ public class MainActivity extends Activity {
     /** Un cuadro de app; sabe en qué fila y posición está. */
     private final class Tile extends LinearLayout {
         final int row, index;
+        String pkg;
 
         Tile(Context ctx, int row, int index) {
             super(ctx);
@@ -292,7 +293,6 @@ public class MainActivity extends Activity {
             Toast.makeText(this, "config.json tiene un error (" + Config.lastError
                     + "). Se usa la configuración de fábrica.", Toast.LENGTH_LONG).show();
         }
-        titleView.setText(cfg.title);
         greetingView.setText(cfg.greeting);
         horoscopes.clear();
         horoscopeDay = "";
@@ -372,13 +372,10 @@ public class MainActivity extends Activity {
         LinearLayout left = new LinearLayout(this);
         left.setOrientation(LinearLayout.VERTICAL);
         header.addView(left, new LinearLayout.LayoutParams(0, -2, 1));
-        titleView = text(13, medium, TEXT);
-        titleView.setLetterSpacing(0.08f);
-        left.addView(titleView);
-        // El saludo y el horóscopo comparten sitio y se alternan con un fundido.
+        // El saludo y el horóscopo comparten sitio y se alternan con un fundido. Ocupan toda la altura de la
+        // cabecera: el horóscopo muestra tres líneas.
         FrameLayout greetBox = new FrameLayout(this);
-        LinearLayout.LayoutParams glp = new LinearLayout.LayoutParams(-1, dp(70));
-        glp.topMargin = dp(12);
+        LinearLayout.LayoutParams glp = new LinearLayout.LayoutParams(-1, dp(96));
         glp.rightMargin = dp(28);
         left.addView(greetBox, glp);
         greetingView = text(38, regular, TEXT);
@@ -397,7 +394,7 @@ public class MainActivity extends Activity {
         horoScroll.setFocusable(false);
         horoScroll.setVerticalFadingEdgeEnabled(true);
         horoScroll.setFadingEdgeLength(dp(10));
-        LinearLayout.LayoutParams hsl = new LinearLayout.LayoutParams(-1, dp(HORO_LINE * 2));
+        LinearLayout.LayoutParams hsl = new LinearLayout.LayoutParams(-1, dp(HORO_LINE * 3));
         hsl.topMargin = dp(6);
         horo.addView(horoScroll, hsl);
         horoText = text(17, regular, TEXT);
@@ -1124,19 +1121,34 @@ public class MainActivity extends Activity {
                 }
             }
         });
+        t.pkg = app.pkg;
         t.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                try {
-                    startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                            Uri.fromParts("package", app.pkg, null)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                } catch (RuntimeException e) {
-                    Toast.makeText(MainActivity.this, app.pkg, Toast.LENGTH_LONG).show();
-                }
+                openAppInfo(app.pkg, app.label);
                 return true;
             }
         });
         return t;
+    }
+
+    /**
+     * La página de la app en los ajustes del Fire TV (la de "Gestionar aplicaciones instaladas"): forzar detención,
+     * borrar caché o datos, desinstalar... Se abre con el botón de opciones del mando o manteniendo OK.
+     */
+    private void openAppInfo(String pkg, String label) {
+        Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", pkg, null))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        ResolveInfo ri = getPackageManager().resolveActivity(i, PackageManager.MATCH_DEFAULT_ONLY);
+        if (ri == null || ri.activityInfo.name.contains("CTSDummy")) {
+            Toast.makeText(this, "El Fire TV no deja abrir la información de " + label + " desde aquí", Toast.LENGTH_LONG).show();
+            return;
+        }
+        try {
+            startActivity(i);
+        } catch (RuntimeException e) {
+            Toast.makeText(this, "No se pudo abrir la información de " + label, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private int step() {
@@ -1164,6 +1176,14 @@ public class MainActivity extends Activity {
     /** Arriba/abajo cambian de categoría (recordando la app de cada fila); izquierda/derecha eligen app. */
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.KEYCODE_MENU && getCurrentFocus() instanceof Tile) {
+            if (e.getAction() == KeyEvent.ACTION_UP && e.getRepeatCount() == 0) {
+                Tile t = (Tile) getCurrentFocus();
+                TextView label = (TextView) t.getChildAt(1);
+                openAppInfo(t.pkg, label.getText().toString());
+            }
+            return true;
+        }
         if (e.getAction() == KeyEvent.ACTION_DOWN) {
             View f = getCurrentFocus();
             int key = e.getKeyCode();
