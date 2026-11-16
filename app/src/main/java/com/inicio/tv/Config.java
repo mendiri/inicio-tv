@@ -51,6 +51,9 @@ final class Config {
     /** Repositorio de GitHub con las versiones de Inicio; "actualizaciones": {"repo": ""} lo desactiva. */
     String updateRepo = "mendiri/inicio-tv";
 
+    /** Fondo con las manchas de color moviéndose; velocidad 1 = normal, 0 = quieto. */
+    float backgroundSpeed = 1f;
+
     boolean footballShow = false;
     final List<String> leagues = new ArrayList<>();
     final List<String> favoriteTeams = new ArrayList<>();
@@ -216,6 +219,11 @@ final class Config {
 
         JSONObject up = o.optJSONObject("actualizaciones");
         if (up != null) c.updateRepo = up.optString("repo", c.updateRepo).trim();
+
+        JSONObject bg = o.optJSONObject("fondo");
+        if (bg != null) {
+            c.backgroundSpeed = bg.optBoolean("animado", true) ? (float) bg.optDouble("velocidad", 1.0) : 0f;
+        }
 
         JSONObject fb = o.optJSONObject("futbol");
         if (fb != null) {

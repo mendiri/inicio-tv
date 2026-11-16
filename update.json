@@ -1,5 +1,5 @@
 {
-  "version": "1.30",
+  "version": "1.31",
   "apk": "dist/Inicio.apk",
-  "notas": "- Sin la línea «INICIO»: el horóscopo muestra tres líneas.\n- Botón de opciones del mando (☰) sobre una app: abre su información en los ajustes del Fire TV."
+  "notas": "- Fondo dinámico: las manchas de color flotan y respiran muy despacio. Se ajusta en config.json (\"fondo\": animado y velocidad)."
 }

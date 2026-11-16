@@ -58,6 +58,11 @@
     ] }
   ],
 
+  "fondo": {
+    "animado": true,
+    "velocidad": 1
+  },
+
   "actualizaciones": {
     "repo": "mendiri/inicio-tv"
   },

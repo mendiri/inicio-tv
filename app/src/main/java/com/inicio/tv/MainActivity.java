@@ -74,6 +74,7 @@ public class MainActivity extends Activity {
 
     // Cabecera
     private TextView greetingView, settingsButton, customizeButton;
+    private AmbientView ambient;
     // Horóscopo: se alterna con el saludo
     private View horoView;
     private TextView horoLabel, horoText;
@@ -189,6 +190,7 @@ public class MainActivity extends Activity {
         net.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(networkChanged, net);
         updateWifi();
+        ambient.start();
         ui.post(refresher);
         ui.removeCallbacks(weatherCycle);
         ui.postDelayed(weatherCycle, Math.max(1, cfg.weatherCycleSeconds) * 1000L);
@@ -204,6 +206,7 @@ public class MainActivity extends Activity {
         ui.removeCallbacks(refresher);
         ui.removeCallbacks(weatherCycle);
         resumed = false;
+        ambient.stop();
         greetTurn++;
         ui.removeCallbacks(cardCycle);
         stopReading();
@@ -294,6 +297,8 @@ public class MainActivity extends Activity {
                     + "). Se usa la configuración de fábrica.", Toast.LENGTH_LONG).show();
         }
         greetingView.setText(cfg.greeting);
+        ambient.setSpeed(cfg.backgroundSpeed);
+        if (resumed) ambient.start();
         horoscopes.clear();
         horoscopeDay = "";
         horoscopeTriedAt = 0;
@@ -347,14 +352,11 @@ public class MainActivity extends Activity {
         return g;
     }
 
-    private Drawable background() {
-        return Look.background(this);
-    }
-
     private View buildUi() {
         FrameLayout root = new FrameLayout(this);
         root.setClipChildren(false);
-        root.setBackground(background());
+        ambient = new AmbientView(this);
+        root.addView(ambient, new FrameLayout.LayoutParams(-1, -1));
 
         LinearLayout page = new LinearLayout(this);
         page.setOrientation(LinearLayout.VERTICAL);
